@@ -307,6 +307,17 @@ def overlap_int_bnd_anal(r,E,E_bnd):
 
 ######## Contact functions #########
 
+def calc_contact_lower(V_L):
+    
+    E_C = np.concatenate((np.arange(-3,0.6,0.001),np.arange(0.55,1.8,0.0002)))
+    
+    C_ad = -8*np.pi*np.gradient(E_C,1/a_0_func(E_C,V_L))
+    
+    return C_ad
+    
+    
+    
+
 def contact_upper_interp(B,V_L):
     
     C_array = np.loadtxt('C_array.csv',delimiter=",",dtype='float')
@@ -323,10 +334,10 @@ def contact_upper_interp(B,V_L):
 
 def contact_lower_interp(B,V_L):
     
-    C_array = np.loadtxt('C_array_lower_no_k.csv',delimiter=",",dtype='float')
+    C_array = np.loadtxt('C_array.csv',delimiter=",",dtype='float')
     
-    E_C = C_array[:,0]
-    C_ad = C_array[:,1]
+    E_C = np.concatenate((np.arange(-3,0.6,0.001),np.arange(0.55,1.8,0.0002)))
+    C_ad = calc_contact_lower(V_L)
 
     B_reff = B_func_97(E_C, V_L)
 

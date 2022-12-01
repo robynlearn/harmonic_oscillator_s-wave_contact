@@ -52,10 +52,20 @@ do_psi0 = 1
 do_highk = 0
 
 #energies to calculate at
-E_C = np.concatenate((np.arange(-3,0.6,0.001),np.arange(0.55,1.66,0.0002)))
+E_C = np.concatenate((np.arange(-3,0.6,0.001),np.arange(0.55,1.8,0.0002)))
+
 
 #lattice depths we care about
-V_L_array = np.array([50,100,200,300])
+#V_L_array = np.array([1,50,100,200,300])
+V_L_array = np.array([200])
+
+E_shift = np.ones((len(E_C),len(V_L_array)))
+for i in range(len(V_L_array)):
+        
+    for k in range(len(E_C)):
+        
+        print('V_L = % .0f, %.0f' % (V_L_array[i],k))
+        E_shift[k,i] = E_C[k] + BuschFunc.anharm_shift_E(E_C[k], V_L_array[i])
 
 #adiabatic contact
 if do_adiabatic == 1:
@@ -64,7 +74,11 @@ if do_adiabatic == 1:
     
     for i in range(len(V_L_array)):
     
-        C_ad[:,i] = -8*np.pi*np.gradient(E_C,1/BuschFunc.a_0_func(E_C,V_L_array[i]))
+        C_ad[:,i] = -8*np.pi*np.gradient(E_shift[:,i],1/BuschFunc.a_0_func(E_C,V_L_array[i]))
+        
+        C_array = np.stack((E_shift[:,i],C_ad[:,i]), axis=1)
+        
+        np.savetxt('C_array_lower_'+str(V_L_array[i])+'ER.csv',C_array)
         
         
 if (do_psi0 == 1) or (do_highk==1):
@@ -103,7 +117,7 @@ fig = plt.figure(dpi=350,figsize=(6, 4))
 
 if do_adiabatic == 1:
     for i in range(len(V_L_array)):
-        plt.plot(E_C,C_ad[:,i],'-',label=r'$V_{\mathrm{L}}$ = %.0f $E_{\mathrm{R}}$' % V_L_array[i])
+        plt.plot(E_shift[:,i],C_ad[:,i],'-',label=r'$V_{\mathrm{L}}$ = %.0f $E_{\mathrm{R}}$' % V_L_array[i])
         
 if do_psi0 == 1:
     plt.plot(E_C,psi0*16*np.pi**2,'.',linewidth=2,label='Psi0')
