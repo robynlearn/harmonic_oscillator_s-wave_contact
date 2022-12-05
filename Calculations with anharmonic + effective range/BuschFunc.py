@@ -54,7 +54,7 @@ def a_E_func(E):
 
 #B-field dependence of scattering length for 40K -7,-9 Feschbach resonance
 
-def B_func_97(E,V_L):
+def B_func_97(a_0,V_L):
 
     hbar = 6.62607015e-34/(2*np.pi)
     m = 39.96399848*1.66053906660e-27    
@@ -71,7 +71,6 @@ def B_func_97(E,V_L):
     omega = 2*E_R*np.sqrt(V_L)/hbar    
     a_ho = np.sqrt(2*hbar/(m*omega))
   
-    a_0 = a_0_func(E,V_L)
     a = a_0*a_ho #[m]
 
     B = del_B/(1 - a/a_bg) + B_0
@@ -79,7 +78,7 @@ def B_func_97(E,V_L):
     return B
     
 
-def B_func_95(E,V_L):
+def B_func_95(a_0,V_L):
     
     hbar = 6.62607015e-34/(2*np.pi)
     a_B = 5.29177210903e-11 #bohr radius [m]
@@ -97,7 +96,6 @@ def B_func_95(E,V_L):
     omega = 2*np.sqrt(V_L)*E_R/hbar
     a_ho = np.sqrt(2*hbar**2/(m*hbar*omega))
     
-    a_0 = a_0_func(E)
     a = a_0*a_ho #[m]
     
     B = del_B/(1 - a/a_bg) + B_0
@@ -320,12 +318,12 @@ def calc_contact_lower(V_L):
 
 def contact_upper_interp(B,V_L):
     
-    C_array = np.loadtxt('C_array.csv',delimiter=",",dtype='float')
+    C_array = np.loadtxt('C_array_upper_'+str(V_L)+'ER.csv',delimiter=',')
     
-    E_C = C_array[:,0]
-    C_ad = C_array[:,1]
+    a_C = C_array[:,0]
+    C_ad = C_array[:,2]
 
-    B_reff = B_func_97(E_C, V_L)
+    B_reff = B_func_97(a_C, V_L)
     
     C_interp_func = scinterp.interp1d(B_reff,C_ad,'cubic')
     C_interp = C_interp_func(B)
@@ -334,12 +332,12 @@ def contact_upper_interp(B,V_L):
 
 def contact_lower_interp(B,V_L):
     
-    C_array = np.loadtxt('C_array.csv',delimiter=",",dtype='float')
-    
-    E_C = np.concatenate((np.arange(-3,0.6,0.001),np.arange(0.55,1.8,0.0002)))
-    C_ad = calc_contact_lower(V_L)
+    C_array = np.loadtxt('C_array_lower_'+str(V_L)+'ER.csv',delimiter=',')
+   
+    a_C = C_array[:,0]
+    C_ad = C_array[:,2]
 
-    B_reff = B_func_97(E_C, V_L)
+    B_reff = B_func_97(a_C, V_L)
 
     C_interp_func = scinterp.interp1d(B_reff,C_ad,'cubic')
     C_interp = C_interp_func(B)
@@ -348,6 +346,17 @@ def contact_lower_interp(B,V_L):
 
 
 ##### anharmonic energy shift ####
+
+def anharm_shift(E):
+    
+    [norm_int,res_int] = np.sqrt(scinteg.quad(psi_s_int, 0,10, args=(E)))
+
+    shift_4 = (1/8)*scinteg.quad(psi_r4_int,0,10,args=(E))[0]
+    shift_6 = (1/40)*scinteg.quad(psi_r6_int,0,10,args=(E))[0]
+    shift = (shift_6 + shift_4 + 3/32)/norm_int**2
+    
+    
+    return shift
 
 def anharm_shift_E(E,V_L):
     
@@ -367,6 +376,7 @@ def anharm_shift_E(E,V_L):
     shift_4 = (1/8)*scinteg.quad(psi_r4_int,0,10,args=(E))[0]
     shift_6 = (1/40)*scinteg.quad(psi_r6_int,0,10,args=(E))[0]
     shift_E = -1*V_L*(E_R/(hbar*omega))*(a_ho*np.pi/a_L)**4*(shift_6 + shift_4 + 3/32)/norm_int**2
+    
     
     return shift_E
     
