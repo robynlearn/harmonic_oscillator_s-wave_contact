@@ -1,6 +1,6 @@
-%% 
+%% Constants
 
-% constants
+% Fundamental Constants
 amu = 1.66054e-27; % amu in kg
 h = 6.62607015e-34; % planck's constant  in Js
 hbar = h/(2*pi); % reduced planck's constant Js
@@ -22,12 +22,14 @@ kL = 2*pi/lambda;
 Er = hbar^2*kL^2/(2*m);
 fr= Er/h;
 
-%%
+%% Bulk Gas Properties
+
 fbar = 100; % trap frequency in Hz
 N=1e5;
 Ef = (3*N)^(1/3)*(h*fbar);
 Tf = Ef/kB;
 kF = sqrt(2*m*Ef/hbar^2);
+
 %% Lattice Depth, frequency, and length scale
 
 V0 = 200;
@@ -50,10 +52,7 @@ avec = B2a(Bvec);
 
 
 %% Harmonic Contact
-
 output = harmonic_contact;
-
-
 
 %%
 figure(10);
