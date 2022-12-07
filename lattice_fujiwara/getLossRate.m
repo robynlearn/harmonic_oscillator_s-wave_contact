@@ -1,5 +1,4 @@
-function [C1,C2] = getHarmonicContact(Vin,Bin)
-%% Constants
+function [R1, R2] = getLossRate(Vin,Bin,Omega,gamma)
 % Fundamental Constants
 amu = 1.66054e-27; % amu in kg
 h = 6.62607015e-34; % planck's constant  in Js
@@ -9,7 +8,8 @@ mubh = 1.39962449e6; % bohr magneton/h in Hz/Gauss
 mub = mubh*h; % (Bohr magneton in J/Gauss).
 kB = 1.381e-23 ; % boltzmann constant in J/K
 
-
+% magnetic moment of molecule
+mu = 1.5*mub;
 
 % atom mass
 m = 40*amu; % amss
@@ -21,14 +21,10 @@ kL = 2*pi/lambda;
 Er = hbar^2*kL^2/(2*m);
 fr= Er/h;
 
-%% Harmonic Approximation
-omega = 2*pi*sqrt(4*Vin)*fr;
+%% Contact
+[C1,C2] = getHarmonicContact(Vin,Bin);
 
-% Harmonic oscillator lengthscale
-aho = sqrt(hbar/(mu_mass*omega));
-
-%% Magnetic Field
-
+%% d(1/a)/dB
 % feshbach
 a_bg = 166.978*a0;
 Delta = 6.910;
@@ -37,23 +33,12 @@ B0 = 202.15;
 % Feshbach field
 B2a = @(B) a_bg*(1-Delta./(B-B0));
 
-% Scattering Length
-a = B2a(Bin);
+dainvdB = (1-a_bg/B2a(Bin)).^2/a_bg*Delta;
 
-%% Normalize scattering length to harmonic length
+%% Rate
 
-X = aho./a;
-
-%% Harmonic Contact
-output = harmonic_contact;
-
-%% Get contact
-
-f1 = output(1).ainv2dEd1a;
-f2 = output(2).ainv2dEd1a;
-
-C1 = -8*pi*f1(X)*(a0./aho);
-C2 = -8*pi*f2(X)*(a0./aho);
+R1 = (Omega^2/gamma)*(C1*hbar^2/(4*pi*m)*(1/mu)*dainvdB);
+R2 = (Omega^2/gamma)*(C2*hbar^2/(4*pi*m)*(1/mu)*dainvdB);
 
 end
 
