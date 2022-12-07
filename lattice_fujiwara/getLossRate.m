@@ -33,7 +33,7 @@ B0 = 202.15;
 % Feshbach field
 B2a = @(B) a_bg*(1-Delta./(B-B0));
 
-dainvdB = (1-a_bg/B2a(Bin)).^2./a_bg*Delta;
+dainvdB = (1-a_bg./B2a(Bin)).^2./(a_bg*Delta);
 
 %% Rate
 
