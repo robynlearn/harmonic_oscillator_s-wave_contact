@@ -124,3 +124,8 @@ plot(Bvec,-8*pi*f2(aho./avec)*(a0/aho),'linewidth',2)
 xlim([195 206]);
 ylim([0 .01]);
 set(gca,'fontsize',12,'xgrid','on','ygrid','on','fontname','times');
+
+%% Output Functions
+
+depth2aho = @(V0) sqrt(hbar/(mu_mass*(2*pi*sqrt(4*V0)*fr)));
+field2contact_1 = @(B,V0) -8*pi*f1(depth2aho(V0)./B2a(B));
