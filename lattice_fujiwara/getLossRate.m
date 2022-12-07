@@ -37,8 +37,8 @@ dainvdB = (1-a_bg./B2a(Bin)).^2./(a_bg*Delta);
 
 %% Rate
 
-R1 = (Omega^2/gamma)*(C1*hbar^2/(4*pi*m)*(1/mu)*dainvdB);
-R2 = (Omega^2/gamma)*(C2*hbar^2/(4*pi*m)*(1/mu)*dainvdB);
+R1 = (Omega^2/gamma)*(C1/a0.*hbar^2/(4*pi*m).*(1/mu).*dainvdB);
+R2 = (Omega^2/gamma)*(C2/a0.*hbar^2/(4*pi*m).*(1/mu).*dainvdB);
 
 end
 
