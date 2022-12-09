@@ -52,13 +52,13 @@ do_psi0 = 0
 do_highk = 0
 
 #energies to calculate at
-E_C = np.concatenate((np.arange(-3,0.6,0.001),np.arange(0.55,1.8,0.00002)))
-#E_C = np.arange(1.75000001,3.75,0.00002)
+#E_C = np.concatenate((np.arange(-3,0.6,0.001),np.arange(0.55,1.8,0.00002)))
+E_C = np.arange(1.75000001,3.75,0.00002)
 
 
 #lattice depths we care about
-V_L_array = np.array([50,100,166,200,300])
-#V_L_array = np.array([200])
+#V_L_array = np.array([50,100,166,200,300])
+V_L_array = np.array([200])
 
 shift = np.ones(len(E_C))
 E_shift = np.ones((len(E_C),len(V_L_array)))
@@ -97,7 +97,8 @@ if do_adiabatic == 1:
     
     for i in range(len(V_L_array)):
         
-        a = BuschFunc.a_0_func(E_C,V_L_array[i])
+        #a = BuschFunc.a_0_func(E_C,V_L_array[i])
+        a = BuschFunc.a_E_func(E_C)
         B = BuschFunc.B_func_97(a, V_L_array[i])
     
         C_ad[:,i] = -8*np.pi*np.gradient(E_shift[:,i],1/a)
@@ -107,12 +108,14 @@ if do_adiabatic == 1:
         if np.any(E_C<1):
         
            # np.savetxt('C_array_lower_'+str(V_L_array[i])+'ER.csv',C_array,delimiter=',')
-            np.savetxt('C_array_lower_'+str(V_L_array[i])+'ER_no_anharm.csv',C_array,delimiter=',')
+          #  np.savetxt('C_array_lower_'+str(V_L_array[i])+'ER_no_anharm.csv',C_array,delimiter=',')
+            np.savetxt('C_array_lower_no_anharm_no_E_dep.csv',C_array,delimiter=',')
             
         else:
             
          #   np.savetxt('C_array_upper_'+str(V_L_array[i])+'ER.csv',C_array,delimiter=',')
-            np.savetxt('C_array_upper_'+str(V_L_array[i])+'ER_no_anharm.csv',C_array,delimiter=',')
+            #np.savetxt('C_array_upper_'+str(V_L_array[i])+'ER_no_anharm.csv',C_array,delimiter=',')
+            np.savetxt('C_array_upper_no_anharm_no_E_dep.csv',C_array,delimiter=',')
             
         
            
