@@ -238,13 +238,15 @@ def psi_harm_p(r,n):
 
 def psi_r4_int(r,E):
     
-    integ = r**4*np.abs(psi_s(r,E))**2
+    integ = r**4*(psi_s(r,E))**2*4*np.pi
+   # integ = r**4*(psi_harm(r,0))**2*4*np.pi
     
     return integ
 
 def psi_r6_int(r,E):
     
-    integ = r**6*np.abs(psi_s(r,E))**2
+    integ = r**6*(psi_s(r,E))**2*4*np.pi
+   # integ = r**6*(psi_harm(r,0))**2*4*np.pi
     
     return integ
 
@@ -349,11 +351,14 @@ def contact_lower_interp(B,V_L):
 
 def anharm_shift(E):
     
-    [norm_int,res_int] = np.sqrt(scinteg.quad(psi_s_int, 0,10, args=(E)))
+    [norm_int,res_int] = np.sqrt(scinteg.quad(psi_s_int, 0,20, args=(E)))
+  #  [norm_int,res_int] = np.sqrt(scinteg.quad(psi_harm, 0,20, args=(0)))
 
-    shift_4 = (1/8)*scinteg.quad(psi_r4_int,0,10,args=(E))[0]
-    shift_6 = (1/40)*scinteg.quad(psi_r6_int,0,10,args=(E))[0]
-    shift = (shift_6 + shift_4 + 3/32)/norm_int**2
+    shift_4 = (1/8)*scinteg.quad(psi_r4_int,0,20,args=(E))[0]/norm_int**2
+    shift_6 = (1/40)*scinteg.quad(psi_r6_int,0,20,args=(E))[0]/norm_int**2
+    shift = (shift_6 + shift_4 + 3/32)
+    
+
     
     
     return shift
@@ -373,9 +378,10 @@ def anharm_shift_E(E,V_L):
     
     [norm_int,res_int] = np.sqrt(scinteg.quad(psi_s_int, 0,10, args=(E)))
 
-    shift_4 = (1/8)*scinteg.quad(psi_r4_int,0,10,args=(E))[0]
-    shift_6 = (1/40)*scinteg.quad(psi_r6_int,0,10,args=(E))[0]
-    shift_E = -1*V_L*(E_R/(hbar*omega))*(a_ho*np.pi/a_L)**4*(shift_6 + shift_4 + 3/32)/norm_int**2
+    shift_4 = scinteg.quad(psi_r4_int,0,100,args=(E))[0]/norm_int**2
+    shift_6 = scinteg.quad(psi_r6_int,0,100,args=(E))[0]/norm_int**2
+   # shift_E = -1*V_L*(E_R/(hbar*omega))*(a_ho*np.pi/a_L)**4*(shift_6 + shift_4 + 3/32)
+    shift_E = -np.sqrt(V_L)/2*(a_ho*np.pi/a_L)**4*((1/40)*shift_6 + (1/8)*shift_4 + 3/32)
     
     
     return shift_E

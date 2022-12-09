@@ -52,13 +52,13 @@ do_psi0 = 0
 do_highk = 0
 
 #energies to calculate at
-#E_C = np.concatenate((np.arange(-3,0.6,0.001),np.arange(0.55,1.8,0.00002)))
-E_C = np.arange(1.75000001,3.75,0.00002)
+E_C = np.concatenate((np.arange(-3,0.6,0.001),np.arange(0.55,1.8,0.00002)))
+#E_C = np.arange(1.75000001,3.75,0.00002)
 
 
 #lattice depths we care about
-#V_L_array = np.array([1,50,100,200,300])
-V_L_array = np.array([166])
+V_L_array = np.array([50,100,166,200,300])
+#V_L_array = np.array([200])
 
 shift = np.ones(len(E_C))
 E_shift = np.ones((len(E_C),len(V_L_array)))
@@ -72,7 +72,7 @@ k_L = 2*np.pi/lambda_L
 E_R = hbar**2*k_L**2/(2*m)
 a_L = lambda_L/2
 
-
+"""
 for k in range(len(E_C)):
         
     print('Shift %.0f' % k)
@@ -84,6 +84,11 @@ for k in range(len(E_C)):
         omega = 2*E_R*np.sqrt(V_L_array[i])/hbar # [Hz]
         a_ho = np.sqrt(2*hbar/(m*omega)) #[m]   
         E_shift[k,i] = E_C[k] + -1*V_L_array[i]*(E_R/(hbar*omega))*(a_ho*np.pi/a_L)**4*shift[k]
+#"""
+
+for i in range(len(V_L_array)):
+    E_shift[:,i] = E_C
+#"""
 
 #adiabatic contact
 if do_adiabatic == 1:
@@ -93,18 +98,21 @@ if do_adiabatic == 1:
     for i in range(len(V_L_array)):
         
         a = BuschFunc.a_0_func(E_C,V_L_array[i])
+        B = BuschFunc.B_func_97(a, V_L_array[i])
     
         C_ad[:,i] = -8*np.pi*np.gradient(E_shift[:,i],1/a)
         
-        C_array = np.stack((a,E_shift[:,i],C_ad[:,i]), axis=1)
+        C_array = np.stack((a,E_shift[:,i],C_ad[:,i],B), axis=1)
         
         if np.any(E_C<1):
         
-            np.savetxt('C_array_lower_'+str(V_L_array[i])+'ER.csv',C_array,delimiter=',')
+           # np.savetxt('C_array_lower_'+str(V_L_array[i])+'ER.csv',C_array,delimiter=',')
+            np.savetxt('C_array_lower_'+str(V_L_array[i])+'ER_no_anharm.csv',C_array,delimiter=',')
             
         else:
             
-            np.savetxt('C_array_upper_'+str(V_L_array[i])+'ER.csv',C_array,delimiter=',')
+         #   np.savetxt('C_array_upper_'+str(V_L_array[i])+'ER.csv',C_array,delimiter=',')
+            np.savetxt('C_array_upper_'+str(V_L_array[i])+'ER_no_anharm.csv',C_array,delimiter=',')
             
         
            
