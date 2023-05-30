@@ -35,7 +35,7 @@ mu_mol = 1.68*mu_B
 
 ###### flags #######
 
-do_gamma = 1
+do_gamma = 0
 do_gammakHz = 1
 plot_lifetime_powers = 0
 plot_CB = 0
@@ -43,6 +43,8 @@ plot_frac_C = 0
 plot_EB = 0
 
 plot_all_data = 1
+
+plot_gamma_12_7 = 0
 
 
 
@@ -60,7 +62,7 @@ if do_gamma == 1:
   #  rabi_mol = 2*np.pi*1*1e6
     
     gamma_mol = 2*np.pi*26*1e6
-    rabi_mol = 2*np.pi*2.6*1e6
+    rabi_mol = 2*np.pi*3*1e6
     
     data = scio.loadmat('/Volumes/GoogleDrive/My Drive/Lattice Shared/SharedData/2022 PA experiment/11_25 lattice_lifetime/lifetime.mat')
     data = data['lifetime']
@@ -94,7 +96,7 @@ if do_gamma == 1:
             B = BuschFunc.B_func_97(C_array[:,0], V_L)
             C_lower = C_array[:,2]/a_ho
         
-        ax.errorbar(B_data,lifetimes,yerr=lifetimes_err,marker='o',linestyle='none')
+        #ax.errorbar(B_data,lifetimes,yerr=lifetimes_err,marker='o',linestyle='none')
         
         R = hbar**2/(m*a_bg*mu_mol*del_B)
         
@@ -110,8 +112,8 @@ if do_gamma == 1:
        # ax.plot(B,frac,label='$V_{\mathrm{L}}$=%.0f $E_{\mathrm{R}}$' % V_L)
        # ax.plot(B,C_upper)
        # ax.plot(B,C_lower)
-        ax.plot(B,gamma,'.')
-        ax.plot(B,gamma_upper,'.')
+       # ax.plot(B,gamma,'.')
+       # ax.plot(B,gamma_upper,'.')
         
       #  ax.plot(B_res*np.ones(10),np.linspace(-0.1,1.3,10),'--',color='gray')
         
@@ -154,6 +156,7 @@ if do_gammakHz == 1:
     
     
     B = np.linspace(200,210,200)
+    B_upper = np.linspace(190,202,200)
     
     #V_L_array = np.array([50,100,200,300])
     V_L_array = [200]
@@ -170,22 +173,31 @@ if do_gammakHz == 1:
        
         if interp == 1:
             
-            C_upper = BuschFunc.contact_upper_interp(B,V_L)/a_ho#*a_B
+            C_upper = BuschFunc.contact_upper_interp(B_upper,V_L)/a_ho#*a_B
             C_lower = BuschFunc.contact_lower_interp(B,V_L)/a_ho#*a_B
+            
         
         else:
             
-            C_array = np.loadtxt('C_array_lower_'+str(V_L)+'ER.csv',delimiter=',')
+            C_array_upper = np.loadtxt('/Users/robynlearn/Documents/GitHub/harmonic_oscillator_s-wave_contact/Calculations with anharmonic + effective range/C_array_upper_200ER_diff_eff_range.csv',delimiter=',')
+            C_array = np.loadtxt('/Users/robynlearn/Documents/GitHub/harmonic_oscillator_s-wave_contact/Calculations with anharmonic + effective range/C_array_lower_200ER_diff_eff_range.csv',delimiter=',')
+          
+            #C_array = np.loadtxt('C_array_lower_'+str(V_L)+'ER.csv',delimiter=',')
             B = BuschFunc.B_func_97(C_array[:,0], V_L)
             C_lower = C_array[:,2]/a_ho
+            
+            B_upper = BuschFunc.B_func_97(C_array_upper[:,0], V_L)
+            C_upper = C_array_upper[:,2]/a_ho
         
-        ax.errorbar(B_data,lifetimes,yerr=lifetimes_err,marker='o',linestyle='none')
+        
+     #   ax.errorbar(B_data,lifetimes,yerr=lifetimes_err,marker='o',linestyle='none')
+      #  ax.errorbar(B_data,gamma_data,yerr=gamma_err,marker='o',linestyle='none')
         
         R = hbar**2/(m*a_bg*mu_mol*del_B)
         
-        N_mol_upper = C_upper*del_B**2*R/(4*np.pi*(B - B_0 - del_B )**2)
-       # N_mol = C_lower*del_B**2*R/(4*np.pi*(B - B_0 - del_B )**2)/2
-        N_mol = C_lower*del_B**2*R/(4*np.pi*((B - B_0 - del_B )**2+(rabi_mol**2/(2*gamma_mol*del_B*mu_mol/hbar))**2))/2
+        N_mol_upper = C_upper*del_B**2*R/(4*np.pi*(B_upper - B_0 - del_B )**2)
+        N_mol = C_lower*del_B**2*R/(4*np.pi*(B - B_0 - del_B )**2)/2
+       # N_mol = C_lower*del_B**2*R/(4*np.pi*((B - B_0 - del_B )**2+(rabi_mol**2/(2*gamma_mol*del_B*mu_mol/hbar))**2))/2
      #   N_mol = C_lower*R/(4*np.pi)*(1-a_bg/a)**2
        # N_mol = -C_lower*hbar**2/(mu_mol*4*np.pi*m)*dadB
         
@@ -195,17 +207,18 @@ if do_gammakHz == 1:
        # ax.plot(B,frac,label='$V_{\mathrm{L}}$=%.0f $E_{\mathrm{R}}$' % V_L)
        # ax.plot(B,C_upper)
        # ax.plot(B,C_lower)
-        ax.plot(B,1/gamma*1000,'.')
-        #ax.plot(B,gamma_upper,'.')
+      #  ax.plot(B,1/gamma*1000,'.')
+        ax.plot(B,gamma/1000,'-')
+       # ax.plot(B_upper,gamma_upper/1000,'-')
         
       #  ax.plot(B_res*np.ones(10),np.linspace(-0.1,1.3,10),'--',color='gray')
         
       #  plt.title('$V_{\mathrm{L}}$=%.0f' % V_L)
         
-    #ax.set_yscale('log')   
+    ax.set_yscale('log')   
         
     ax.grid('on')
-    plt.xlim([200,210])
+    plt.xlim([190,210])
    # plt.ylim([0,0.1e6])
 
     plt.title('$V_{\mathrm{L}}$=%.0f' % V_L)
@@ -480,12 +493,12 @@ if plot_all_data == 1:
     
     gamma_mol = 2*np.pi*26*1e6 #max power
     rabi_mol_max = 2*np.pi*2.6*1e6 #max power
-    V_L = 166
+    V_L = 200
     
-    P_max = 1.15
-    P_max2 = 1
+    P_max = 1.16
+  #  P_max2 = 1
 
-    fig, ax = plt.subplots(dpi=350,figsize=(4,3))
+    
     
     #plot theory at max power
     B = np.linspace(202,209,200)
@@ -496,18 +509,43 @@ if plot_all_data == 1:
     R = hbar**2/(m*a_bg*mu_mol*del_B)
     N_mol = C_lower*del_B**2*R/(4*np.pi*((B - B_0 - del_B )**2+(rabi_mol_max**2/(2*gamma_mol*del_B*mu_mol/hbar))**2))/2
     gamma = 2*N_mol*rabi_mol_max**2/(gamma_mol)
-    ax.plot(B,gamma/1000/P_max2,'-')
+    ax.plot(B,gamma/1000/P_max,'-')
     
     #### 11 25 data ####
+    power = 1.16 #unclear
     data = scio.loadmat('/Volumes/GoogleDrive/My Drive/Lattice Shared/SharedData/2022 PA experiment/11_25 lattice_lifetime/lifetime.mat')
+   # data = scio.loadmat('/Volumes/GoogleDrive/My Drive/Lattice Shared/SharedData/2022 PA experiment/lattice_lifetime_all/Lattice_Lifetime_1mW_200_Er.mat')
     data = data['lifetime']
-    B_data = data[0][0][0][:,0] #G
-    gamma_data = (data[0][0][1][0])/P_max2 #1/ms
-    gamma_err = (data[0][0][2][0])/P_max2 #1/ms
+    B_data = data[0][0][0][:,0] + 0.15 #G
+    gamma_data = (data[0][0][1][0])*P_max/power #1/ms
+    gamma_err = (data[0][0][2][0])*P_max/power #1/ms
     lifetimes = 1/gamma_data #ms
     lifetimes_err = gamma_err/gamma_data**2 #ms
     
-    ax.errorbar(B_data,gamma_data,yerr=gamma_err,marker='o',linestyle='none')
+   # ax.errorbar(B_data,gamma_data,yerr=gamma_err,marker='o',linestyle='none',label='1.16 mW')
+    
+    
+    #### 11 25 data ####
+    power = 1.16
+    data = scio.loadmat('/Volumes/GoogleDrive/My Drive/Lattice Shared/SharedData/2022 PA experiment/lattice_lifetime_all/Lattice_Lifetime_1mW_200_Er.mat')
+    data = data['summary0']
+    B_data = data[0][0][0][0,:] + 0.15 #G
+    gamma_data = (data[0][0][1][0])*P_max/power #1/ms
+    gamma_err = (data[0][0][2][0])*P_max/power #1/ms
+    lifetimes = 1/gamma_data #ms
+    lifetimes_err = gamma_err/gamma_data**2 #ms
+    
+    ax.errorbar(B_data,gamma_data,yerr=gamma_err,marker='o',linestyle='none',label='1.16 mW')
+    
+    #### 12 07 data ####
+    power = 0.027
+    data = scio.loadmat('/Volumes/GoogleDrive/My Drive/Lattice Shared/SharedData/2022 PA experiment/lattice_lifetime_all/Lattice_Lifetime_30uW_200_Er.mat')
+    data = data['summary1']
+    B_data = data[0][0][0][0,:]+0.15 #G
+    gamma_data = (data[0][0][1][0])*P_max/power #1/ms
+    gamma_err = (data[0][0][2][0])*P_max/power #1/ms
+    
+    ax.errorbar(B_data,gamma_data,yerr=gamma_err,marker='o',linestyle='none',label='0.027 mW')
     
     #### 11 29 data ####
     
@@ -519,7 +557,7 @@ if plot_all_data == 1:
     gamma_data1 = data[0][0][6][0]*P_max/powers1
     gamma_err1 = data[0][0][7][0]*P_max/powers1
     
-    ax.errorbar(B_data1,gamma_data1,yerr=gamma_err1,marker='o',linestyle='none')
+   # ax.errorbar(B_data1,gamma_data1,yerr=gamma_err1,marker='o',linestyle='none')
     
     #204G
     data = scio.loadmat('/Volumes/GoogleDrive/My Drive/Lattice Shared/SharedData/2022 PA experiment/11_29 lattice lifetime/lattice_pa_lifetime_power_204_G.mat')
@@ -529,7 +567,7 @@ if plot_all_data == 1:
     gamma_data2 = data[0][0][6][0]*P_max/powers2
     gamma_err2 = data[0][0][7][0]*P_max/powers2
     
-    ax.errorbar(B_data2,gamma_data2,yerr=gamma_err2,marker='o',linestyle='none')
+  #  ax.errorbar(B_data2,gamma_data2,yerr=gamma_err2,marker='o',linestyle='none')
     
     #206G
     data = scio.loadmat('/Volumes/GoogleDrive/My Drive/Lattice Shared/SharedData/2022 PA experiment/11_29 lattice lifetime/lattice_pa_lifetime_power_206_G.mat')
@@ -539,19 +577,116 @@ if plot_all_data == 1:
     gamma_data3 = data[0][0][6][0]*P_max/powers3
     gamma_err3 = data[0][0][7][0]*P_max/powers3
     
-    ax.errorbar(B_data3,gamma_data3,yerr=gamma_err3,marker='o',linestyle='none')
+   # ax.errorbar(B_data3,gamma_data3,yerr=gamma_err3,marker='o',linestyle='none')
     
 
     ax.set_yscale('log')   
         
     ax.grid('on')
     plt.xlim([202,209])
-    plt.ylim([0,150])
+    plt.ylim([0.1,1000])
 
     plt.title('$V_{\mathrm{L}}$=%.0f' % V_L)
     
     
     plt.xlabel('B field (G)')
+    plt.ylabel(r'$\Gamma$ (1/ms)')
+    
+    plt.legend()
+    
+if plot_gamma_12_7 == 1:
+    
+    interp = 1
+    
+    #guesstimate molecular rabi freq plus lifetime
+    
+  #  gamma_mol = 2*np.pi*10*1e6
+  #  rabi_mol = 2*np.pi*1*1e6
+    
+    gamma_mol = 2*np.pi*26*1e6 #max power 
+    rabi_mol = 2*np.pi*0.35*1e6 #max power
+    
+    data = data = scio.loadmat('/Volumes/GoogleDrive/My Drive/Lattice Shared/SharedData/2022 PA experiment/lattice_lifetime_all/Lattice_Lifetime_30uW_200_Er.mat')
+    data = data['summary1']
+    B_data = data[0][0][0][0,:]+0.15 #G
+    gamma_data = (data[0][0][1][0]) #1/ms
+    gamma_err = (data[0][0][2][0]) #1/ms
+    
+    
+    lifetimes = 1/gamma_data #ms
+    lifetimes_err = gamma_err/gamma_data**2 #ms
+    
+    
+    B = np.linspace(200,210,200)
+    B_upper = np.linspace(190,202,200)
+
+    V_L_array = [200]
+    
+  #  fig, ax = plt.subplots(dpi=350,figsize=(4,3))
+    
+    for V_L in V_L_array:
+        
+        omega = 2*E_R*np.sqrt(V_L)/hbar
+        a_ho = np.sqrt(2*hbar/(m*omega))
+           
+      #  a = BuschFunc.a_interp_B_97_1st_branch(B, BuschFunc.E_interp_1st_branch_97(B, V_L), V_L)*a_ho
+       # dadB = np.gradient(a**-1,B)/a_ho
+       
+        if interp == 1:
+            
+            C_upper = BuschFunc.contact_upper_interp(B_upper,V_L)/a_ho#*a_B
+            C_lower = BuschFunc.contact_lower_interp(B,V_L)/a_ho#*a_B
+        
+        else:
+            
+            C_array_upper = np.loadtxt('/Users/robynlearn/Documents/GitHub/harmonic_oscillator_s-wave_contact/Calculations with anharmonic + effective range/C_array_upper_200ER_diff_eff_range.csv',delimiter=',')
+            C_array = np.loadtxt('/Users/robynlearn/Documents/GitHub/harmonic_oscillator_s-wave_contact/Calculations with anharmonic + effective range/C_array_lower_200ER_diff_eff_range.csv',delimiter=',')
+          
+            # C_array = np.loadtxt('C_array_lower_'+str(V_L)+'ER.csv',delimiter=',')
+            B = BuschFunc.B_func_97(C_array[:,0], V_L)
+            C_lower = C_array[:,2]/a_ho
+            
+            B_upper = BuschFunc.B_func_97(C_array_upper[:,0], V_L)
+            C_upper = C_array_upper[:,2]/a_ho
+            
+            
+            
+        
+       # ax.errorbar(B_data,lifetimes,yerr=lifetimes_err,marker='o',linestyle='none',label='12/7 data')
+        ax.errorbar(B_data,gamma_data,yerr=gamma_err,marker='o',linestyle='none')
+        
+        R = hbar**2/(m*a_bg*mu_mol*del_B)
+        
+        N_mol_upper = C_upper*del_B**2*R/(4*np.pi*(B_upper - B_0 - del_B )**2)/2
+        N_mol = C_lower*del_B**2*R/(4*np.pi*((B - B_0 - del_B )**2+(rabi_mol**2/(2*gamma_mol*del_B*mu_mol/hbar))**2))/2
+     #   N_mol = C_lower*R/(4*np.pi)*(1-a_bg/a)**2
+       # N_mol = -C_lower*hbar**2/(mu_mol*4*np.pi*m)*dadB
+        
+        gamma_upper = 2*np.sqrt(N_mol_upper)*rabi_mol**2/(gamma_mol)
+        gamma = 2*N_mol**2*rabi_mol**2/(gamma_mol)*700
+            
+       # ax.plot(B,frac,label='$V_{\mathrm{L}}$=%.0f $E_{\mathrm{R}}$' % V_L)
+       # ax.plot(B,C_upper)
+       # ax.plot(B,C_lower)
+       # ax.plot(B,1/gamma*1000,'.')
+        ax.plot(B,(gamma/1000),'-',label='Lower')
+      #  ax.plot(B_upper,(gamma_upper/1000),'-',label='Upper')
+        
+      #  ax.plot(B_res*np.ones(10),np.linspace(-0.1,1.3,10),'--',color='gray')
+        
+      #  plt.title('$V_{\mathrm{L}}$=%.0f' % V_L)
+        
+    ax.set_yscale('log')   
+        
+    ax.grid('on')
+   # plt.xlim([190,210])
+   # plt.ylim([3e-2,4e1])
+
+    plt.title('$V_{\mathrm{L}}$=%.0f' % V_L)
+    
+    
+    plt.xlabel('B field (G)')
+   # plt.ylabel(r'$\tau$ (ms)')
     plt.ylabel(r'$\Gamma$ (1/ms)')
     
     plt.legend()

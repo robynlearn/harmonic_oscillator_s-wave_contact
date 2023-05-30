@@ -19,7 +19,7 @@ import imageio
 
 
 ######### Define functions ###########
-
+"""
 #scattering length for given energy w. effective range
 def a_0_func(E,V_L):
     
@@ -44,7 +44,38 @@ def a_0_func(E,V_L):
    # a_0 = a_E_func(E)
     
     return a_0
+#"""
+#"""
+#scattering length for given energy w. effective range
+def a_0_func(E,V_L):
+    
+    a_B = 5.29177210903e-11 #bohr radius [m]
+    hbar = 6.62607015e-34/(2*np.pi)
+    m = 39.96399848*1.66053906660e-27
 
+    lambda_L = 1054e-9 #laser wavelength [m]
+    k_L = 2*np.pi/lambda_L
+    E_R = hbar**2*k_L**2/(2*m)
+    
+    omega = 2*E_R*np.sqrt(V_L)/hbar # [Hz]
+    a_ho = np.sqrt(2*hbar/(m*omega)) #[m]
+    
+    r_vdw = 65.0223142660582*a_B
+    a_bar = 4*np.pi/scsp.gamma(1/4)**2*r_vdw
+    a = a_E_func(E)*a_ho
+    
+    r_eff = scsp.gamma(1/4)**4/(6*np.pi**2)*a_bar*(1 - 2*(a_bar/a) + 2*(a_bar/a)**2)
+    #r_eff = scsp.gamma(1/4)**2/(3*np.pi)*2*65.0223142660582*a_B #[m]
+  #  r_eff = 98*a_B
+    
+    shift = E*r_eff/a_ho
+   
+    a_0 = 1/(2*scsp.gamma(-E/2+3/4)/scsp.gamma(-E/2+1/4) + shift)
+    
+   # a_0 = a_E_func(E)
+    
+    return a_0
+#"""
 #energy-dependent scattering length for given energy
 def a_E_func(E):
     
@@ -106,8 +137,10 @@ def B_func_95(a_0,V_L):
 def E_interp_1st_branch_95(B,V_L):
     
     E = np.linspace(1.6,3.6,500)
+    
+    a = a_0_func(E,V_L)
 
-    B_interp = B_func_95(E,V_L)
+    B_interp = B_func_95(a,V_L)
     
     E_interp_func = scinterp.interp1d(B_interp,E,kind='cubic')
     E_interp = E_interp_func(B)
@@ -117,8 +150,11 @@ def E_interp_1st_branch_95(B,V_L):
 def E_interp_1st_branch_97(B,V_L):
     
     E = np.linspace(-10,1.7,500)
+    
+    a = a_0_func(E,V_L)
+  #  a = a_E_func(E)
 
-    B_interp = B_func_97(E,V_L)
+    B_interp = B_func_97(a,V_L)
    
     E_interp_func = scinterp.interp1d(B_interp,E,kind='cubic')
     E_interp = E_interp_func(B)
@@ -128,14 +164,47 @@ def E_interp_1st_branch_97(B,V_L):
 
 def E_interp_2nd_branch_97(B,V_L):
     
-    E = np.linspace(1.8,3.5-0.00000001,100)
+    E = np.linspace(1.6,3.5-0.00000001,100)
+    
+    a = a_0_func(E,V_L)
+  #  a = a_E_func(E)
 
-    B_interp = B_func_97(E,V_L)
+    B_interp = B_func_97(a,V_L)
    
     E_interp_func = scinterp.interp1d(B_interp,E,kind='cubic')
     E_interp = E_interp_func(B)
     
     return E_interp
+
+#shift for rf spec
+def rf_spec_shift(B,V_L):
+    
+    
+    hbar = 6.626e-34/(2*np.pi)
+    m = 39.96399848*1.66053906660e-27 # [kg]
+    
+    lambda_L = 1054e-9 #laser wavelength [m]
+    k_L = 2*np.pi/lambda_L
+    E_R = hbar**2*k_L**2/(2*m)
+    
+    omega = 2*E_R*np.sqrt(V_L)/hbar
+    
+    shift = np.ones(len(B))
+    
+    for i in range(len(B)):
+    
+        if B[i]<202.15:
+            
+            shift[i] = E_interp_1st_branch_95(B[i],V_L) - E_interp_2nd_branch_97(B[i],V_L)
+            
+        else:
+            
+            shift[i] = E_interp_1st_branch_95(B[i],V_L) - E_interp_1st_branch_97(B[i],V_L)
+        
+    shift_kHz = shift*omega/(1000*2*np.pi)
+        
+    return shift_kHz
+
 
 def E_interp_a(a):
     
@@ -149,7 +218,7 @@ def E_interp_a(a):
     
     return E_interp
 
-def a_B_97_1st_branch(B,E,V_L):
+def a_B_97_1st_branch(B,V_L):
     
     hbar = 6.62607015e-34/(2*np.pi)
     a_B = 5.29177210903e-11 #bohr radius [m]
@@ -321,6 +390,7 @@ def calc_contact_lower(V_L):
 def contact_upper_interp(B,V_L):
     
     C_array = np.loadtxt('C_array_upper_'+str(V_L)+'ER.csv',delimiter=',')
+   # C_array = np.loadtxt('/Users/robynlearn/Documents/GitHub/harmonic_oscillator_s-wave_contact/Calculations with anharmonic + effective range/C_array_upper_200ER_diff_eff_range.csv',delimiter=',')
     
     a_C = C_array[:,0]
     C_ad = C_array[:,2]
@@ -334,12 +404,18 @@ def contact_upper_interp(B,V_L):
 
 def contact_lower_interp(B,V_L):
     
+    
     C_array = np.loadtxt('C_array_lower_'+str(V_L)+'ER.csv',delimiter=',')
+    
+   # C_array = np.loadtxt('/Users/robynlearn/Documents/GitHub/harmonic_oscillator_s-wave_contact/Calculations with anharmonic + effective range/C_array_lower_200ER_diff_eff_range.csv',delimiter=',')
    
     a_C = C_array[:,0]
     C_ad = C_array[:,2]
+    
+    
 
     B_reff = B_func_97(a_C, V_L)
+    
 
     C_interp_func = scinterp.interp1d(B_reff,C_ad,'cubic')
     C_interp = C_interp_func(B)

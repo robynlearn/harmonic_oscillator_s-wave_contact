@@ -32,6 +32,7 @@ fontsize_leg = 12
 spine_width = 1.5
 
 
+
 def amp_ft_integ(r,k,E):
     
     
@@ -51,13 +52,18 @@ do_adiabatic = 1
 do_psi0 = 0
 do_highk = 0
 
+do_save = 1
+
 #energies to calculate at
 #E_C = np.concatenate((np.arange(-3,0.6,0.001),np.arange(0.55,1.8,0.00002)))
+#E_C = np.concatenate((np.arange(-10,0.6,0.001),np.arange(0.55,1.8,0.00002)))
 E_C = np.arange(1.75000001,3.75,0.00002)
+
+E_C =  np.concatenate((np.arange(-10,0.6,0.001),np.arange(0.55,10,0.00002)))
 
 
 #lattice depths we care about
-#V_L_array = np.array([50,100,166,200,300])
+#V_L_array = np.array([212.8074])
 V_L_array = np.array([200])
 
 shift = np.ones(len(E_C))
@@ -84,8 +90,8 @@ for k in range(len(E_C)):
         omega = 2*E_R*np.sqrt(V_L_array[i])/hbar # [Hz]
         a_ho = np.sqrt(2*hbar/(m*omega)) #[m]   
         E_shift[k,i] = E_C[k] + -1*V_L_array[i]*(E_R/(hbar*omega))*(a_ho*np.pi/a_L)**4*shift[k]
+"""
 #"""
-
 for i in range(len(V_L_array)):
     E_shift[:,i] = E_C
 #"""
@@ -97,7 +103,7 @@ if do_adiabatic == 1:
     
     for i in range(len(V_L_array)):
         
-        #a = BuschFunc.a_0_func(E_C,V_L_array[i])
+      #  a = BuschFunc.a_0_func(E_C,V_L_array[i])
         a = BuschFunc.a_E_func(E_C)
         B = BuschFunc.B_func_97(a, V_L_array[i])
     
@@ -105,19 +111,22 @@ if do_adiabatic == 1:
         
         C_array = np.stack((a,E_shift[:,i],C_ad[:,i],B), axis=1)
         
-        if np.any(E_C<1):
-        
-           # np.savetxt('C_array_lower_'+str(V_L_array[i])+'ER.csv',C_array,delimiter=',')
-          #  np.savetxt('C_array_lower_'+str(V_L_array[i])+'ER_no_anharm.csv',C_array,delimiter=',')
-            np.savetxt('C_array_lower_no_anharm_no_E_dep.csv',C_array,delimiter=',')
+        if do_save == 1:
             
-        else:
+            if np.any(E_C<1):
             
-         #   np.savetxt('C_array_upper_'+str(V_L_array[i])+'ER.csv',C_array,delimiter=',')
-            #np.savetxt('C_array_upper_'+str(V_L_array[i])+'ER_no_anharm.csv',C_array,delimiter=',')
-            np.savetxt('C_array_upper_no_anharm_no_E_dep.csv',C_array,delimiter=',')
+              # np.savetxt('C_array_lower_'+str(V_L_array[i])+'ER_no_anharm.csv',C_array,delimiter=',')
+                np.savetxt('C_array_all_'+str(V_L_array[i])+'ER_no_eff_r_no_anharm.csv',C_array,delimiter=',')
+              #  np.savetxt('C_array_lower_'+str(V_L_array[i])+'ER_no_anharm.csv',C_array,delimiter=',')
+              #  np.savetxt('C_array_lower_no_anharm_no_E_dep.csv',C_array,delimiter=',')
+                
+            else:
+                
+                np.savetxt('C_array_upper_'+str(V_L_array[i])+'ER_no_anharm_no_eff_r.csv',C_array,delimiter=',')
+                #np.savetxt('C_array_upper_'+str(V_L_array[i])+'ER_no_anharm.csv',C_array,delimiter=',')
+              #  np.savetxt('C_array_upper_no_anharm_no_E_dep.csv',C_array,delimiter=',')
+                
             
-        
            
         
         
@@ -167,7 +176,10 @@ if do_highk == 1:
     
 plt.xlabel(r'Energy ($\hbar \omega$)')
 plt.ylabel(r'Contact ($a_{\mathrm{ho}}^{-1}$)')
+#plt.ylim([-0.5,8])
+plt.ylim([-5,80])
+plt.xlim([-5,10])
 
-plt.legend()
+#plt.legend()
         
         

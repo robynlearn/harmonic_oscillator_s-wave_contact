@@ -37,8 +37,8 @@ omega = 2*E_R*np.sqrt(V_L)/hbar # [Hz]
 a_ho = np.sqrt(2*hbar/(m*omega)) #[m]  
 
 E = np.linspace(-10,3.7,dim) #[hbar_omega]    
-#a_0 = BuschFunc.a_0_func(E,V_L) #[a_h0]
-a_0 = BuschFunc.a_E_func(E)
+a_0 = BuschFunc.a_0_func(E,V_L) #[a_h0]
+#a_0 = BuschFunc.a_E_func(E)
 
 shift = np.ones(len(E))
 E_shift = np.ones(len(E))
